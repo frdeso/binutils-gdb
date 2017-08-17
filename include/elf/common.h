@@ -654,6 +654,9 @@
 /* Note segment for SystemTap probes.  */
 #define NT_STAPSDT	3
 
+/* Note segment for LTTng UST probes.  */
+#define NT_LTTNGUST	4
+
 /* Note segments for core files on FreeBSD systems.  Note name is
    "FreeBSD".  */
 

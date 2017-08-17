@@ -16943,6 +16943,42 @@ print_stapsdt_note (Elf_Internal_Note *pnote)
 }
 
 static const char *
+get_lttngust_note_type (unsigned e_type)
+{
+  static char buff[64];
+
+//  printf("%s\n", __func__);
+  switch (e_type)
+    {
+    case NT_LTTNGUST:
+      return _("NT_LTTNGUST (LTTng UST probe descriptors)");
+
+    default:
+      break;
+    }
+
+  snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
+  return buff;
+}
+
+static bfd_boolean
+print_lttngust_note (Elf_Internal_Note *pnote)
+{
+  char *data = pnote->descdata;
+  char *data_end = pnote->descdata + pnote->descsz;
+  char *provider, *probe;
+
+  provider = data;
+  data += strlen(data) + 1;
+  probe = data;
+
+  printf (_("    Provider: %s\n"), provider);
+  printf (_("    Name: %s\n"), probe);
+
+  return data == data_end;
+}
+
+static const char *
 get_ia64_vms_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -17496,12 +17532,14 @@ process_note (Elf_Internal_Note *  pnote,
 
   else if (const_strneq (pnote->namedata, "stapsdt"))
     nt = get_stapsdt_note_type (pnote->type);
-
+  else if (const_strneq (pnote->namedata, "LTTng-UST"))
+    nt = get_lttngust_note_type (pnote->type);
   else
     /* Don't recognize this note name; just use the default set of
        note type strings.  */
     nt = get_note_type (pnote->type);
 
+  //printf("** %s: %ld\n", pnote->namedata, pnote->type);
   printf ("  ");
 
   if (((const_strneq (pnote->namedata, "GA")
@@ -17524,6 +17562,8 @@ process_note (Elf_Internal_Note *  pnote,
     return print_gnu_note (pnote);
   else if (const_strneq (pnote->namedata, "stapsdt"))
     return print_stapsdt_note (pnote);
+  else if (const_strneq (pnote->namedata, "LTTng-UST"))
+    return print_lttngust_note (pnote);
   else if (const_strneq (pnote->namedata, "CORE"))
     return print_core_note (pnote);
   else if (((const_strneq (pnote->namedata, "GA")
